@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>CLF-C02 — 8 Dias</title>
+<style>
+  :root{
+    --bg: #0b1220;
+    --bg-panel: #101a2e;
+    --bg-item: #16223b;
+    --line: #223255;
+    --text: #dce6f5;
+    --text-dim: #7e93b8;
+    --accent: #4fd1c5;
+    --accent-dim: #245b56;
+    --warn: #f2a154;
+    --danger: #e0607a;
+    --mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+    --sans: 'Inter', -apple-system, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background: var(--bg);
+    background-image:
+      radial-gradient(circle at 15% 0%, rgba(79,209,197,0.08), transparent 40%),
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: auto, 48px 48px, 48px 48px;
+    background-position: 0 0, -1px -1px, -1px -1px;
+    color: var(--text);
+    font-family: var(--sans);
+    padding: 20px 14px 80px;
+    min-height:100vh;
+  }
+  header{
+    max-width: 880px;
+    margin: 0 auto 22px;
+  }
+  .eyebrow{
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+  h1{
+    font-size: 26px;
+    margin: 4px 0 2px;
+    letter-spacing: -0.5px;
+  }
+  .subtitle{
+    color: var(--text-dim);
+    font-size: 13px;
+    font-family: var(--mono);
+  }
+  .overall-bar-wrap{
+    max-width: 880px;
+    margin: 18px auto 24px;
+    background: var(--bg-panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .overall-top{
+    display:flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+  }
+  .overall-top .label{ font-size:12px; color:var(--text-dim); font-family:var(--mono); text-transform:uppercase; letter-spacing:1px;}
+  .overall-top .pct{ font-family: var(--mono); font-size: 20px; color: var(--accent); font-weight:600;}
+  .bar-track{
+    height: 8px;
+    background: #0d1626;
+    border-radius: 6px;
+    overflow:hidden;
+    border: 1px solid var(--line);
+  }
+  .bar-fill{
+    height:100%;
+    background: linear-gradient(90deg, var(--accent-dim), var(--accent));
+    width:0%;
+    transition: width .3s ease;
+  }
+  main{ max-width: 880px; margin: 0 auto; }
+  .domain{
+    background: var(--bg-panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .domain-head{
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .domain-head:active{ background: rgba(255,255,255,0.02); }
+  .domain-title{
+    display:flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .domain-num{
+    font-family: var(--mono);
+    color: var(--text-dim);
+    font-size: 12px;
+  }
+  .domain-name{
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .domain-weight{
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--warn);
+    background: rgba(242,161,84,0.1);
+    border: 1px solid rgba(242,161,84,0.3);
+    padding: 2px 8px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+  .domain-progress{
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent);
+    min-width: 46px;
+    text-align: right;
+  }
+  .chevron{
+    color: var(--text-dim);
+    transition: transform .2s ease;
+    margin-left: 8px;
+  }
+  .domain.open .chevron{ transform: rotate(90deg); }
+  .domain-body{
+    display:none;
+    border-top: 1px solid var(--line);
+    padding: 6px 12px 14px;
+  }
+  .domain.open .domain-body{ display:block; }
+  .topic{
+    border-bottom: 1px solid rgba(34,50,85,0.5);
+    padding: 10px 4px;
+  }
+  .topic:last-child{ border-bottom:none; }
+  .topic-row{
+    display:flex;
+    align-items:flex-start;
+    gap: 10px;
+  }
+  .topic-check{
+    appearance:none;
+    -webkit-appearance:none;
+    width: 20px;
+    height: 20px;
+    min-width:20px;
+    border-radius: 5px;
+    border: 1.5px solid var(--text-dim);
+    background: var(--bg-item);
+    margin-top: 2px;
+    cursor:pointer;
+    position:relative;
+  }
+  .topic-check:checked{
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .topic-check:checked::after{
+    content:'';
+    position:absolute;
+    left:6px; top:2px;
+    width:5px; height:9px;
+    border: solid #06231f;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+  .topic-label{
+    font-size: 14px;
+    line-height: 1.4;
+    flex:1;
+    cursor:pointer;
+  }
+  .topic.done .topic-label{
+    color: var(--text-dim);
+    text-decoration: line-through;
+    text-decoration-color: var(--accent-dim);
+  }
+  .topic-note-toggle{
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    background: none;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 3px 7px;
+    cursor: pointer;
+    white-space:nowrap;
+  }
+  .topic-note-toggle.has-note{
+    color: var(--accent);
+    border-color: var(--accent-dim);
+  }
+  .topic-note{
+    display:none;
+    margin-top: 8px;
+    margin-left: 30px;
+  }
+  .topic-note.open{ display:block; }
+  .topic-note textarea{
+    width: 100%;
+    min-height: 70px;
+    background: #0d1626;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 13px;
+    padding: 8px 10px;
+    resize: vertical;
+  }
+  .topic-note textarea:focus{
+    outline: none;
+    border-color: var(--accent-dim);
+  }
+  footer{
+    max-width: 880px;
+    margin: 20px auto 0;
+    text-align:center;
+  }
+  .reset-btn{
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--danger);
+    background: none;
+    border: 1px solid rgba(224,96,122,0.3);
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  .save-indicator{
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    background: var(--bg-panel);
+    border: 1px solid var(--line);
+    padding: 6px 10px;
+    border-radius: 20px;
+    opacity: 0;
+    transition: opacity .3s ease, background .3s ease, color .3s ease;
+  }
+  .save-indicator.show{ opacity: 1; }
+  .save-indicator.ok{ color: var(--accent); border-color: var(--accent-dim); }
+  .save-indicator.warn{ color: var(--warn); border-color: rgba(242,161,84,0.4); opacity: 1; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">AWS Certified Cloud Practitioner · CLF-C02</div>
+  <h1>Revisão — 8 dias</h1>
+  <div class="subtitle">65 questões · 90 min · nota mínima 700/1000</div>
+</header>
+
+<div class="overall-bar-wrap">
+  <div class="overall-top">
+    <span class="label">Progresso geral</span>
+    <span class="pct" id="overall-pct">0%</span>
+  </div>
+  <div class="bar-track"><div class="bar-fill" id="overall-fill"></div></div>
+</div>
+
+<main id="domains"></main>
+
+<footer>
+  <button class="reset-btn" onclick="resetAll()">Zerar progresso</button>
+</footer>
+
+<div class="save-indicator" id="save-indicator">salvo</div>
+
+<script>
+const DATA = [
+  {
+    id: 'security',
+    name: 'Security & Compliance',
+    weight: '30%',
+    topics: [
+      'Shared Responsibility Model (o que é da AWS vs do cliente)',
+      'IAM: users, groups, roles, policies (identity-based vs resource-based)',
+      'IAM: MFA, root user best practices, princípio do menor privilégio',
+      'AWS Organizations: SCPs, contas múltiplas, consolidated billing',
+      'AWS Config: compliance e configuração de recursos',
+      'GuardDuty: detecção de ameaças',
+      'Inspector: análise de vulnerabilidades',
+      'AWS Artifact: relatórios de compliance e acordos',
+      'Trusted Advisor: categoria de segurança (checks)',
+      'KMS: conceito de gerenciamento de chaves e encryption at rest/in transit',
+      'WAF e Shield: proteção contra ataques web e DDoS (nível conceitual)',
+      'AWS Secrets Manager vs Systems Manager Parameter Store',
+      'Compliance programs (HIPAA, PCI-DSS, GDPR) — o que a AWS oferece',
+    ]
+  },
+  {
+    id: 'compute',
+    name: 'Cloud Technology & Services — Compute',
+    weight: '34% (parte 1)',
+    topics: [
+      'EC2: tipos de instância (família e uso — compute, memory, storage optimized)',
+      'EC2: pricing models — On-Demand, Reserved, Spot, Savings Plans, Dedicated Hosts',
+      'EC2: Auto Scaling Groups e Elastic Load Balancing (ALB, NLB, GLB)',
+      'Lambda: serverless, quando usar, modelo de cobrança',
+      'ECS vs EKS vs Fargate: diferença entre orquestração gerenciada e serverless containers',
+      'Elastic Beanstalk: PaaS para deploy rápido',
+      'Lightsail: VPS simplificado para casos simples',
+      'Outpost/Local Zones/Wavelength (nível conceitual, hybrid/edge)',
+    ]
+  },
+  {
+    id: 'storage-db',
+    name: 'Cloud Technology & Services — Storage & Database',
+    weight: '34% (parte 2)',
+    topics: [
+      'S3: classes de armazenamento (Standard, IA, One Zone-IA, Glacier, Glacier Deep Archive)',
+      'S3: durabilidade (11 9s) vs disponibilidade, versionamento, lifecycle policies',
+      'EBS vs EFS vs Instance Store — quando usar cada um',
+      'Storage Gateway: conceito de ponte entre on-premises e AWS',
+      'RDS: bancos relacionais gerenciados, Multi-AZ vs Read Replicas',
+      'DynamoDB: NoSQL gerenciado, quando usar em vez de RDS',
+      'Redshift: data warehouse e analytics',
+      'ElastiCache: cache gerenciado (Redis/Memcached)',
+      'Database Migration Service (DMS): conceito de migração',
+    ]
+  },
+  {
+    id: 'network-mgmt',
+    name: 'Cloud Technology & Services — Networking & Management',
+    weight: '34% (parte 3)',
+    topics: [
+      'VPC: conceitos básicos (subnets públicas/privadas, route tables, IGW, NAT Gateway)',
+      'Security Groups vs Network ACLs — diferenças',
+      'Route 53: DNS gerenciado e roteamento (nível conceitual)',
+      'CloudFront: CDN, edge locations',
+      'Direct Connect vs VPN Site-to-Site — conexão híbrida',
+      'CloudWatch: métricas, alarmes, logs',
+      'CloudTrail: auditoria de API calls',
+      'CloudFormation: Infrastructure as Code (conceito)',
+      'Systems Manager: gerenciamento de instâncias em escala',
+      'AWS Well-Architected Tool (relação com os 6 pilares)',
+    ]
+  },
+  {
+    id: 'concepts',
+    name: 'Cloud Concepts',
+    weight: '24%',
+    topics: [
+      'Os 6 pilares do Well-Architected Framework',
+      'Benefícios da cloud: elasticidade, agility, economia de escala',
+      'CapEx vs OpEx — mudança de modelo financeiro',
+      'Migration strategies — os 6 Rs (Rehost, Replatform, Repurchase, Refactor, Retain, Retire)',
+      'Modelos de deployment: public, private, hybrid cloud',
+      'Modelos de serviço: IaaS, PaaS, SaaS — exemplos de cada um na AWS',
+      'Global infrastructure: Regions, Availability Zones, Edge Locations',
+      'Alta disponibilidade e tolerância a falhas — diferença conceitual',
+    ]
+  },
+  {
+    id: 'billing',
+    name: 'Billing, Pricing & Support',
+    weight: '12%',
+    topics: [
+      'Pricing models: On-Demand, Reserved, Spot, Savings Plans — comparação direta',
+      'Free Tier: o que cobre e limitações',
+      'Cost Explorer: visualização e análise de custos',
+      'AWS Budgets: alertas de orçamento',
+      'Consolidated Billing: benefícios de contas múltiplas',
+      'Support Plans: Basic, Developer, Business, Enterprise — SLA e diferenças de resposta',
+      'AWS Marketplace: conceito',
+      'Pricing calculator: estimativa de custos',
+      'Trusted Advisor: categoria de otimização de custos',
+    ]
+  }
+];
+
+let saveTimeout;
+
+function render(){
+  const container = document.getElementById('domains');
+  container.innerHTML = '';
+  DATA.forEach(domain => {
+    const domainEl = document.createElement('div');
+    domainEl.className = 'domain';
+    domainEl.id = 'domain-' + domain.id;
+
+    const head = document.createElement('div');
+    head.className = 'domain-head';
+    head.onclick = () => toggleDomain(domain.id);
+    head.innerHTML = `
+      <div class="domain-title">
+        <span class="domain-name">${domain.name}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span class="domain-weight">${domain.weight}</span>
+        <span class="domain-progress" id="progress-${domain.id}">0/0</span>
+        <span class="chevron">▶</span>
+      </div>
+    `;
+
+    const body = document.createElement('div');
+    body.className = 'domain-body';
+
+    domain.topics.forEach((topic, idx) => {
+      const topicId = `${domain.id}-${idx}`;
+      const topicEl = document.createElement('div');
+      topicEl.className = 'topic';
+      topicEl.id = 'topic-' + topicId;
+      topicEl.innerHTML = `
+        <div class="topic-row">
+          <input type="checkbox" class="topic-check" id="check-${topicId}" onchange="onCheck('${topicId}')">
+          <label class="topic-label" for="check-${topicId}">${topic}</label>
+          <button class="topic-note-toggle" id="notetoggle-${topicId}" onclick="toggleNote('${topicId}')">+ nota</button>
+        </div>
+        <div class="topic-note" id="note-wrap-${topicId}">
+          <textarea id="note-${topicId}" placeholder="anota aqui..." oninput="onNoteInput('${topicId}')"></textarea>
+        </div>
+      `;
+      body.appendChild(topicEl);
+    });
+
+    domainEl.appendChild(head);
+    domainEl.appendChild(body);
+    container.appendChild(domainEl);
+  });
+}
+
+function toggleDomain(id){
+  document.getElementById('domain-' + id).classList.toggle('open');
+}
+
+function toggleNote(topicId){
+  const wrap = document.getElementById('note-wrap-' + topicId);
+  wrap.classList.toggle('open');
+}
+
+async function onCheck(topicId){
+  const checked = document.getElementById('check-' + topicId).checked;
+  document.getElementById('topic-' + topicId).classList.toggle('done', checked);
+  await saveState();
+  updateProgress();
+}
+
+async function onNoteInput(topicId){
+  const val = document.getElementById('note-' + topicId).value;
+  const toggleBtn = document.getElementById('notetoggle-' + topicId);
+  toggleBtn.textContent = val.trim() ? '✓ nota' : '+ nota';
+  toggleBtn.classList.toggle('has-note', !!val.trim());
+  clearTimeout(saveTimeout);
+  saveTimeout = setTimeout(saveState, 500);
+}
+
+function updateProgress(){
+  let totalAll = 0, doneAll = 0;
+  DATA.forEach(domain => {
+    let total = domain.topics.length;
+    let done = 0;
+    domain.topics.forEach((_, idx) => {
+      const cb = document.getElementById(`check-${domain.id}-${idx}`);
+      if (cb && cb.checked) done++;
+    });
+    document.getElementById('progress-' + domain.id).textContent = `${done}/${total}`;
+    totalAll += total;
+    doneAll += done;
+  });
+  const pct = totalAll ? Math.round((doneAll / totalAll) * 100) : 0;
+  document.getElementById('overall-pct').textContent = pct + '%';
+  document.getElementById('overall-fill').style.width = pct + '%';
+}
+
+let lastState = null;
+let retryTimer = null;
+let retryCount = 0;
+
+function collectState(){
+  const state = { checks: {}, notes: {} };
+  DATA.forEach(domain => {
+    domain.topics.forEach((_, idx) => {
+      const topicId = `${domain.id}-${idx}`;
+      const cb = document.getElementById('check-' + topicId);
+      const note = document.getElementById('note-' + topicId);
+      if (cb.checked) state.checks[topicId] = true;
+      if (note.value.trim()) state.notes[topicId] = note.value;
+    });
+  });
+  return state;
+}
+
+async function saveState(){
+  const state = collectState();
+  lastState = state; // guarda em memória independente do storage funcionar
+  try{
+    const result = await window.storage.set('clf-c02-state', JSON.stringify(state), false);
+    if (!result) throw new Error('resposta vazia do storage');
+    showIndicator('salvo', 'ok');
+    retryCount = 0;
+    clearTimeout(retryTimer);
+  }catch(e){
+    console.log('storage indisponível no momento, mantendo progresso na sessão:', e.message || e);
+    showIndicator('não sincronizado', 'warn');
+    scheduleRetry();
+  }
+}
+
+function scheduleRetry(){
+  clearTimeout(retryTimer);
+  retryCount++;
+  const delay = Math.min(3000 * retryCount, 15000);
+  retryTimer = setTimeout(async () => {
+    try{
+      const result = await window.storage.set('clf-c02-state', JSON.stringify(lastState), false);
+      if (result){
+        showIndicator('salvo', 'ok');
+        retryCount = 0;
+        return;
+      }
+      throw new Error('resposta vazia');
+    }catch(e){
+      scheduleRetry();
+    }
+  }, delay);
+}
+
+function showIndicator(text, type){
+  const ind = document.getElementById('save-indicator');
+  ind.textContent = text;
+  ind.classList.remove('ok','warn');
+  ind.classList.add('show', type);
+  if (type === 'ok'){
+    clearTimeout(showIndicator._t);
+    showIndicator._t = setTimeout(() => ind.classList.remove('show'), 1200);
+  }
+}
+
+async function loadState(){
+  try{
+    const result = await window.storage.get('clf-c02-state', false);
+    if (!result) return;
+    const state = JSON.parse(result.value);
+    applyState(state);
+  }catch(e){
+    console.log('sem estado salvo ainda ou storage indisponível ao carregar');
+  }
+}
+
+function applyState(state){
+  Object.keys(state.checks || {}).forEach(topicId => {
+    const cb = document.getElementById('check-' + topicId);
+    if (cb){
+      cb.checked = true;
+      document.getElementById('topic-' + topicId).classList.add('done');
+    }
+  });
+  Object.keys(state.notes || {}).forEach(topicId => {
+    const note = document.getElementById('note-' + topicId);
+    const toggleBtn = document.getElementById('notetoggle-' + topicId);
+    if (note){
+      note.value = state.notes[topicId];
+      toggleBtn.textContent = '✓ nota';
+      toggleBtn.classList.add('has-note');
+    }
+  });
+  updateProgress();
+}
+
+async function resetAll(){
+  if (!confirm('Zerar todo o progresso e notas?')) return;
+  lastState = null;
+  retryCount = 0;
+  clearTimeout(retryTimer);
+  try{
+    await window.storage.delete('clf-c02-state', false);
+  }catch(e){}
+  render();
+  updateProgress();
+}
+
+render();
+loadState();
+</script>
+
+</body>
+</html>
